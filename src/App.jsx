@@ -1,6 +1,6 @@
 function App() {
   return <>
-  hello world new changes</>;
+  hello world</>;
 }
 
 export default App;
