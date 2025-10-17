@@ -170,55 +170,76 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
 
   if (hasSplit_Vertically) {
     return (
-      <div ref={containerRef} className="flex w-full h-full">
+      <>
+      {
+        children.length == 1 ? <div className="w-full h-full">
+          <DivBox
+            key={children[0]?.id}
+            id={children[0]?.id}
+            depth={depth + 2}
+            bgColor={children[0]?.color}
+            onDelete={() => handleSplit_Delete(children[0]?.id)}
+          />
+        </div> : <div ref={containerRef} className="flex w-full h-full">
         <div style={{ width: `${leftWidth}%` }} className="h-full">
           <DivBox
-            key={children[0].id}
-            id={children[0].id}
+            key={children[0]?.id}
+            id={children[0]?.id}
             depth={depth + 2}
-            bgColor={children[0].color}
-            onDelete={() => handleSplit_Delete(children[0].id)}
+            bgColor={children[0]?.color}
+            onDelete={() => handleSplit_Delete(children[0]?.id)}
           />
         </div>
-
         <ResizeComponent_V onResize={handleResize_Vertically} currentPercentage={leftWidth} />
         <div style={{ width: `${100 - leftWidth}%` }} className="h-full">
           <DivBox
-            key={children[1].id}
-            id={children[1].id}
+            key={children[1]?.id}
+            id={children[1]?.id}
             depth={depth + 2}
-            bgColor={children[1].color}
-            onDelete={() => handleSplit_Delete(children[1].id)}
+            bgColor={children[1]?.color}
+            onDelete={() => handleSplit_Delete(children[1]?.id)}
           />
         </div>
       </div>
+      }
+      </>
     );
   }
 
   if (hasSplit_Horizontally) {
     return (
-      <div ref={containerRef} className="flex flex-col w-full h-full">
+      <>
+      {children.length == 1 ? <div className="h-full w-full">
+          <DivBox
+            key={children[0]?.id}
+            id={children[0]?.id}
+            depth={depth + 2}
+            bgColor={children[0]?.color}
+            onDelete={() => handleSplit_Delete(children[0]?.id)}
+          />
+        </div> : <div ref={containerRef} className="flex flex-col w-full h-full">
         <div style={{ height: `${topHeight}%` }} className="w-full">
           <DivBox
-            key={children[0].id}
-            id={children[0].id}
+            key={children[0]?.id}
+            id={children[0]?.id}
             depth={depth + 2}
-            bgColor={children[0].color}
-            onDelete={() => handleSplit_Delete(children[0].id)}
+            bgColor={children[0]?.color}
+            onDelete={() => handleSplit_Delete(children[0]?.id)}
           />
         </div>
 
         <ResizeComponent_H onResize={handleResize_Horizontally} currentPercentage={topHeight} />
         <div style={{ height: `${100 - topHeight}%` }} className="w-full">
           <DivBox
-            key={children[1].id}
-            id={children[1].id}
+            key={children[1]?.id}
+            id={children[1]?.id}
             depth={depth + 2}
-            bgColor={children[1].color}
-            onDelete={() => handleSplit_Delete(children[1].id)}
+            bgColor={children[1]?.color}
+            onDelete={() => handleSplit_Delete(children[1]?.id)}
           />
         </div>
-      </div>
+      </div>}
+      </>
     );
   }
 
