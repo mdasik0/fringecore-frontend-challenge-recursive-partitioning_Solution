@@ -5,7 +5,9 @@ const generateRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const ResizeComponent_V = ({ onResize, currentPercentage }) => {
+
+
+const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [showPercentage, setShowPercentage] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -20,6 +22,9 @@ const ResizeComponent_V = ({ onResize, currentPercentage }) => {
     const handleMouseUp_Vertical = () => {
       setIsDragging(false);
 
+       if (onResizeEnd) {
+        onResizeEnd();
+      }
       setTimeout(() => {
         setIsVisible(false);
       }, 800);
@@ -40,7 +45,7 @@ const ResizeComponent_V = ({ onResize, currentPercentage }) => {
       document.removeEventListener("mousemove", handleMouseMove_Vertical);
       document.removeEventListener("mouseup", handleMouseUp_Vertical);
     };
-  }, [isDragging, onResize]);
+  }, [isDragging, onResize, onResizeEnd]);
 
   return (
     <div
@@ -60,7 +65,7 @@ const ResizeComponent_V = ({ onResize, currentPercentage }) => {
   );
 };
 
-const ResizeComponent_H = ({ onResize, currentPercentage }) => {
+const ResizeComponent_H = ({ onResize, onResizeEnd, currentPercentage }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [showPercentage, setShowPercentage] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -74,6 +79,10 @@ const ResizeComponent_H = ({ onResize, currentPercentage }) => {
 
     const handleMouseUp_Horizontal = () => {
       setIsDragging(false);
+
+       if (onResizeEnd) {
+        onResizeEnd();
+      }
 
       setTimeout(() => {
         setIsVisible(false);
@@ -95,7 +104,7 @@ const ResizeComponent_H = ({ onResize, currentPercentage }) => {
       document.removeEventListener("mousemove", handleMouseMove_Horizontal);
       document.removeEventListener("mouseup", handleMouseUp_Horizontal);
     };
-  }, [isDragging, onResize]);
+  }, [isDragging, onResize, onResizeEnd]);
 
   return (
     <div
@@ -156,6 +165,18 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
     });
   };
 
+  const snapToGrid = (value) => {
+    const snapPoints = [25, 33.33, 50, 66.67, 75];
+    const threshold = 3; // Snap if within 3% of a snap point
+    
+    for (const point of snapPoints) {
+      if (Math.abs(value - point) < threshold) {
+        return point;
+      }
+    }
+    return value;
+  };
+
   const handleResize_Vertically = (clientX) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -164,12 +185,20 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
     }
   };
 
+  const handleResizeEnd_Vertically = () => {
+    setLeftWidth(prevWidth => snapToGrid(prevWidth));
+  };
+
   const handleResize_Horizontally = (clientY) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const newTopHeight = ((clientY - rect.top) / rect.height) * 100;
       setTopHeight(Math.max(10, Math.min(90, newTopHeight)));
     }
+  };
+
+    const handleResizeEnd_Horizontally = () => {
+    setTopHeight(prevHeight => snapToGrid(prevHeight));
   };
 
   if (hasSplit_Vertically) {
@@ -192,6 +221,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
         {children.length === 2 && (
           <ResizeComponent_V
             onResize={handleResize_Vertically}
+            onResizeEnd={handleResizeEnd_Vertically}
             currentPercentage={leftWidth}
           />
         )}
@@ -235,6 +265,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
         {children.length === 2 && (
           <ResizeComponent_H
             onResize={handleResize_Horizontally}
+            onResizeEnd={handleResizeEnd_Horizontally}
             currentPercentage={topHeight}
           />
         )}
