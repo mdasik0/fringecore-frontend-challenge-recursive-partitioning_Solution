@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { colors } from "./lib/colors/colors";
 
-const DivBox = ({ id, deapth }) => {
+const generateRandomColor = () => {
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+const DivBox = ({ id, depth, bgColor }) => {
   const [hasSplitVertically, setHasSplitVertically] = useState(false);
   const [children, setChildren] = useState([]);
   const handleSplitVertically = () => {
-    const newChildrenDivs = [`${id}-left`, `${id}-right`];
+    const newChildrenDivs = [{id : `${id}-left`, color:bgColor}, {id: `${id}-right`, color:generateRandomColor()}];
 
     if (!hasSplitVertically) {
       setChildren(newChildrenDivs);
@@ -14,13 +19,13 @@ const DivBox = ({ id, deapth }) => {
   if(hasSplitVertically){
     return <div className="flex gap-2 w-full h-full">
     {
-      children.map((childId) => <DivBox key={childId} id={childId} deapth={deapth+2} />)
+      children.map((child) => <DivBox key={child.id} id={child.id} depth={depth+2} bgColor={child.color} />)
     }
     </div>
   }
 
   return (
-    <div className="w-full h-full bg-blue-500 flex items-center justify-center">
+    <div className={`${bgColor} w-full h-full flex items-center justify-center`}>
       <div className="buttons flex font-semibold items-center border-2 border-gray-400">
         <button
           onClick={handleSplitVertically}
@@ -42,7 +47,7 @@ const DivBox = ({ id, deapth }) => {
 function App() {
   return (
     <div className="w-screen h-screen">
-      <DivBox id="root" />
+      <DivBox id="root" bgColor={'bg-blue-500'} />
     </div>
   );
 }
