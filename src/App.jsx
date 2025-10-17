@@ -32,14 +32,8 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
     }
   };
   const handleSplit_Delete = (childId) => {
-    setChildren(children.filter((c) => c !== childId));
-    if (children.length === 2) {
-      setTimeout(() => {
-        setHasSplit_Vertically(false);
-        setHasSplit_Horizontally(false);
-        setChildren([]);
-      }, 0);
-    }
+    const updatedChildren = children.filter((c) => c.id !== childId);
+    setChildren(updatedChildren);
   };
   if (hasSplit_Vertically) {
     return (
@@ -89,12 +83,14 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
         >
           h
         </button>
-        {onDelete && <button
-          onClick={onDelete}
-          className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center border-2 border-gray-400 -ml-1 text-xl uppercase"
-        >
-          -
-        </button>}
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center border-2 border-gray-400 -ml-1 text-xl uppercase"
+          >
+            -
+          </button>
+        )}
       </div>
     </div>
   );
