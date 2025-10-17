@@ -5,7 +5,7 @@ const generateRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const DivBox = ({ id, depth, bgColor }) => {
+const DivBox = ({ id, depth, bgColor, onDelete }) => {
   const [hasSplit_Vertically, setHasSplit_Vertically] = useState(false);
   const [hasSplit_Horizontally, setHasSplit_Horizontally] = useState(false);
   const [children, setChildren] = useState([]);
@@ -31,6 +31,16 @@ const DivBox = ({ id, depth, bgColor }) => {
       setHasSplit_Horizontally(true);
     }
   };
+  const handleSplit_Delete = (childId) => {
+    setChildren(children.filter((c) => c !== childId));
+    if (children.length === 2) {
+      setTimeout(() => {
+        setHasSplit_Vertically(false);
+        setHasSplit_Horizontally(false);
+        setChildren([]);
+      }, 0);
+    }
+  };
   if (hasSplit_Vertically) {
     return (
       <div className="flex gap-2 w-full h-full">
@@ -54,6 +64,7 @@ const DivBox = ({ id, depth, bgColor }) => {
             id={child.id}
             depth={depth + 2}
             bgColor={child.color}
+            onDelete={() => handleSplit_Delete(child.id)}
           />
         ))}
       </div>
@@ -64,22 +75,25 @@ const DivBox = ({ id, depth, bgColor }) => {
     <div
       className={`${bgColor} w-full h-full flex items-center justify-center`}
     >
-      <div className="buttons flex font-semibold items-center border-2 border-gray-400">
+      <div className="buttons flex font-semibold items-center ">
         <button
           onClick={handleSplit_Vertically}
-          className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center  uppercase"
+          className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center border-2 border-gray-400 -mr-1 uppercase"
         >
           v
         </button>
         <button
           onClick={handleSplit_Horizontally}
-          className="bg-white hover:bg-gray-200 duration-300 w-9 h-8 flex items-center justify-center border-l-2 border-r-2 border-gray-400 uppercase"
+          className="bg-white hover:bg-gray-200 duration-300 w-9 h-8 flex items-center justify-center border-2 border-gray-400 uppercase"
         >
           h
         </button>
-        <button className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center text-xl uppercase">
+        {onDelete ? <button
+          onClick={onDelete}
+          className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center border-2 border-gray-400 -ml-1 text-xl uppercase"
+        >
           -
-        </button>
+        </button> : ''}
       </div>
     </div>
   );
