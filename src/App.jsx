@@ -32,7 +32,6 @@ const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
       if (onResizeEnd) {
         const finalPercentage = onResizeEnd();
         const label = getSnapLabel(finalPercentage);
-        console.log(finalPercentage)
         if (label) {
           setSnapLabel(label);
         }
@@ -60,7 +59,6 @@ const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
       document.removeEventListener("mouseup", handleMouseUp_Vertical);
     };
   }, [isDragging, onResize, onResizeEnd]);
-console.log(snapLabel)
   return (
     <div
       className="relative w-2 bg-gray-600 hover:bg-red-500 cursor-col-resize flex-shrink-0 transition-colors"
@@ -72,8 +70,7 @@ console.log(snapLabel)
             isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          {/* {currentPercentage == 25 ? '1/4': currentPercentage == 50 ? '1/2' : currentPercentage == 75 ? '3/4' : `${currentPercentage.toFixed(1)}%`} */}
-          {currentPercentage.toFixed(1)}%
+          {snapLabel || `${currentPercentage.toFixed(1)}%`}
         </div>
       )}
     </div>
@@ -191,10 +188,8 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
     const snapPoints = [25, 33.33, 50, 66.67, 75];
     const threshold = 5;
 
-    
     for (const point of snapPoints) {
       if (Math.abs(value - point) < threshold) {
-        console.log(value, point)
         return point;
       }
     }
@@ -210,8 +205,9 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
   };
 
   const handleResizeEnd_Vertically = () => {
-    setLeftWidth((prevWidth) => snapToGrid(prevWidth));
-    
+    const snappedWidth = snapToGrid(leftWidth);
+    setLeftWidth(snappedWidth);
+    return snappedWidth;
   };
 
   const handleResize_Horizontally = (clientY) => {
@@ -223,7 +219,9 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
   };
 
   const handleResizeEnd_Horizontally = () => {
-    setTopHeight((prevHeight) => snapToGrid(prevHeight));
+    const snappedHeight = snapToGrid(topHeight);
+    setTopHeight(snappedHeight);
+    return snappedHeight;
   };
 
   if (hasSplit_Vertically) {
