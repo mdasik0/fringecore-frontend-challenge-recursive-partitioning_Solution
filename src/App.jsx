@@ -1,14 +1,63 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { colors } from "./lib/colors/colors";
 
 const generateRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
+const ResizeComponent = ({ onResize }) => {
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove_Vertical = (e) => {
+      if (isDragging) {
+        onResize(e.clientX);
+      }
+    };
+    const handleMouseMove_Horizontal = (e) => {
+      if (isDragging) {
+        onResize(e.clientY);
+      }
+    };
+
+    const handleMouseUp_Vertical = () => {
+      setIsDragging(false);
+    };
+    const handleMouseUp_Horizontal = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove_Vertical);
+      document.addEventListener("mouseup", handleMouseUp_Vertical);
+      document.addEventListener("mousemove", handleMouseMove_Horizontal);
+      document.addEventListener("mouseup", handleMouseUp_Horizontal);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove_Vertical);
+      document.removeEventListener("mouseup", handleMouseUp_Vertical);
+      document.removeEventListener("mousemove", handleMouseMove_Horizontal);
+      document.removeEventListener("mouseup", handleMouseUp_Horizontal);
+    };
+  }, [isDragging, onResize]);
+
+  return (
+    <div
+      className="w-2 bg-gray-600 hover:bg-red-500 cursor-col-resize flex-shrink-0 transition-colors"
+      onMouseDown={() => setIsDragging(true)}
+    />
+  );
+};
+
 const DivBox = ({ id, depth, bgColor, onDelete }) => {
   const [hasSplit_Vertically, setHasSplit_Vertically] = useState(false);
   const [hasSplit_Horizontally, setHasSplit_Horizontally] = useState(false);
   const [children, setChildren] = useState([]);
+  const [leftWidth, setLeftWidth] = useState(50);
+  const [topWidth, setTopWidth] = useState(50);
+  const containerRef = useRef();
+
   const handleSplit_Vertically = () => {
     const newChildrenDivs = [
       { id: `${id}-left`, color: bgColor },
@@ -18,6 +67,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
     if (!hasSplit_Vertically) {
       setChildren(newChildrenDivs);
       setHasSplit_Vertically(true);
+      setLeftWidth(50);
     }
   };
   const handleSplit_Horizontally = () => {
@@ -31,25 +81,47 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
       setHasSplit_Horizontally(true);
     }
   };
+
   const handleSplit_Delete = (childId) => {
     const updatedChildren = children.filter((c) => c.id !== childId);
     setChildren(updatedChildren);
   };
+
+  const handleResize_Vertically = (clientX) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const newLeftWidth = ((clientX - rect.left) / rect.width) * 100;
+      setLeftWidth(Math.max(10, Math.min(90, newLeftWidth)));
+    }
+  };
+
   if (hasSplit_Vertically) {
     return (
-      <div className="flex gap-2 w-full h-full">
-        {children.map((child) => (
+      <div ref={containerRef} className="flex w-full h-full">
+        <div style={{ width: `${leftWidth}%` }} className="h-full">
           <DivBox
-            key={child.id}
-            id={child.id}
+            key={children[0].id}
+            id={children[0].id}
             depth={depth + 2}
-            bgColor={child.color}
-            onDelete={() => handleSplit_Delete(child.id)}
+            bgColor={children[0].color}
+            onDelete={() => handleSplit_Delete(children[0].id)}
           />
-        ))}
+        </div>
+
+        <ResizeComponent onResize={handleResize_Vertically} />
+        <div style={{ width: `${100 - leftWidth}%` }} className="h-full">
+          <DivBox
+            key={children[1].id}
+            id={children[1].id}
+            depth={depth + 2}
+            bgColor={children[1].color}
+            onDelete={() => handleSplit_Delete(children[1].id)}
+          />
+        </div>
       </div>
     );
   }
+
   if (hasSplit_Horizontally) {
     return (
       <div className="flex flex-col gap-2 w-full h-full">
