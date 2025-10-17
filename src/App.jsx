@@ -50,6 +50,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
             id={child.id}
             depth={depth + 2}
             bgColor={child.color}
+            onDelete={() => handleSplit_Delete(child.id)}
           />
         ))}
       </div>
@@ -88,12 +89,12 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
         >
           h
         </button>
-        {onDelete ? <button
+        {onDelete && <button
           onClick={onDelete}
           className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center border-2 border-gray-400 -ml-1 text-xl uppercase"
         >
           -
-        </button> : ''}
+        </button>}
       </div>
     </div>
   );
