@@ -185,7 +185,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
   };
 
   const snapToGrid = (value) => {
-    const snapPoints = [25, 33.33, 50, 66.67, 75];
+    const snapPoints = [25, 50, 75];
     const threshold = 5;
 
     for (const point of snapPoints) {
