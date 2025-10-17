@@ -5,12 +5,19 @@ const generateRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-
+const getSnapLabel = (percentage) => {
+  const rounded = Math.round(percentage * 10) / 10;
+  if (Math.abs(rounded - 25) < 0.5) return "1/4";
+  if (Math.abs(rounded - 50) < 0.5) return "1/2";
+  if (Math.abs(rounded - 75) < 0.5) return "3/4";
+  return null;
+};
 
 const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [showPercentage, setShowPercentage] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [snapLabel, setSnapLabel] = useState(null);
 
   useEffect(() => {
     const handleMouseMove_Vertical = (e) => {
@@ -22,8 +29,13 @@ const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
     const handleMouseUp_Vertical = () => {
       setIsDragging(false);
 
-       if (onResizeEnd) {
-        onResizeEnd();
+      if (onResizeEnd) {
+        const finalPercentage = onResizeEnd();
+        const label = getSnapLabel(finalPercentage);
+        console.log(finalPercentage)
+        if (label) {
+          setSnapLabel(label);
+        }
       }
       setTimeout(() => {
         setIsVisible(false);
@@ -31,12 +43,14 @@ const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
 
       setTimeout(() => {
         setShowPercentage(false);
+        setSnapLabel(null);
       }, 1000);
     };
 
     if (isDragging) {
       setShowPercentage(true);
       setIsVisible(true);
+      setSnapLabel(null);
       document.addEventListener("mousemove", handleMouseMove_Vertical);
       document.addEventListener("mouseup", handleMouseUp_Vertical);
     }
@@ -46,7 +60,7 @@ const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
       document.removeEventListener("mouseup", handleMouseUp_Vertical);
     };
   }, [isDragging, onResize, onResizeEnd]);
-
+console.log(snapLabel)
   return (
     <div
       className="relative w-2 bg-gray-600 hover:bg-red-500 cursor-col-resize flex-shrink-0 transition-colors"
@@ -58,6 +72,7 @@ const ResizeComponent_V = ({ onResize, onResizeEnd, currentPercentage }) => {
             isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
+          {/* {currentPercentage == 25 ? '1/4': currentPercentage == 50 ? '1/2' : currentPercentage == 75 ? '3/4' : `${currentPercentage.toFixed(1)}%`} */}
           {currentPercentage.toFixed(1)}%
         </div>
       )}
@@ -69,6 +84,7 @@ const ResizeComponent_H = ({ onResize, onResizeEnd, currentPercentage }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [showPercentage, setShowPercentage] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [snapLabel, setSnapLabel] = useState(null);
 
   useEffect(() => {
     const handleMouseMove_Horizontal = (e) => {
@@ -80,8 +96,12 @@ const ResizeComponent_H = ({ onResize, onResizeEnd, currentPercentage }) => {
     const handleMouseUp_Horizontal = () => {
       setIsDragging(false);
 
-       if (onResizeEnd) {
-        onResizeEnd();
+      if (onResizeEnd) {
+        const finalPercentage = onResizeEnd();
+        const label = getSnapLabel(finalPercentage);
+        if (label) {
+          setSnapLabel(label);
+        }
       }
 
       setTimeout(() => {
@@ -90,12 +110,14 @@ const ResizeComponent_H = ({ onResize, onResizeEnd, currentPercentage }) => {
 
       setTimeout(() => {
         setShowPercentage(false);
+        setSnapLabel(null);
       }, 1000);
     };
 
     if (isDragging) {
       setShowPercentage(true);
       setIsVisible(true);
+      setSnapLabel(null);
       document.addEventListener("mousemove", handleMouseMove_Horizontal);
       document.addEventListener("mouseup", handleMouseUp_Horizontal);
     }
@@ -117,7 +139,7 @@ const ResizeComponent_H = ({ onResize, onResizeEnd, currentPercentage }) => {
             isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          {currentPercentage.toFixed(1)}%
+          {snapLabel || `${currentPercentage.toFixed(1)}%`}
         </div>
       )}
     </div>
@@ -167,10 +189,12 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
 
   const snapToGrid = (value) => {
     const snapPoints = [25, 33.33, 50, 66.67, 75];
-    const threshold = 3; // Snap if within 3% of a snap point
+    const threshold = 5;
+
     
     for (const point of snapPoints) {
       if (Math.abs(value - point) < threshold) {
+        console.log(value, point)
         return point;
       }
     }
@@ -186,7 +210,8 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
   };
 
   const handleResizeEnd_Vertically = () => {
-    setLeftWidth(prevWidth => snapToGrid(prevWidth));
+    setLeftWidth((prevWidth) => snapToGrid(prevWidth));
+    
   };
 
   const handleResize_Horizontally = (clientY) => {
@@ -197,8 +222,8 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
     }
   };
 
-    const handleResizeEnd_Horizontally = () => {
-    setTopHeight(prevHeight => snapToGrid(prevHeight));
+  const handleResizeEnd_Horizontally = () => {
+    setTopHeight((prevHeight) => snapToGrid(prevHeight));
   };
 
   if (hasSplit_Vertically) {
@@ -214,7 +239,11 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
               id={children[0].id}
               depth={depth + 2}
               bgColor={children[0].color}
-              onDelete={children.length === 2 ? () => handleSplit_Delete(children[0].id) : onDelete}
+              onDelete={
+                children.length === 2
+                  ? () => handleSplit_Delete(children[0].id)
+                  : onDelete
+              }
             />
           </div>
         )}
@@ -237,7 +266,11 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
               id={children[1].id}
               depth={depth + 2}
               bgColor={children[1].color}
-              onDelete={children.length === 2 ? () => handleSplit_Delete(children[1].id) : onDelete}
+              onDelete={
+                children.length === 2
+                  ? () => handleSplit_Delete(children[1].id)
+                  : onDelete
+              }
             />
           </div>
         )}
@@ -258,7 +291,11 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
               id={children[0].id}
               depth={depth + 2}
               bgColor={children[0].color}
-              onDelete={children.length === 2 ? () => handleSplit_Delete(children[0].id) : onDelete}
+              onDelete={
+                children.length === 2
+                  ? () => handleSplit_Delete(children[0].id)
+                  : onDelete
+              }
             />
           </div>
         )}
@@ -281,7 +318,11 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
               id={children[1].id}
               depth={depth + 2}
               bgColor={children[1].color}
-              onDelete={children.length === 2 ? () => handleSplit_Delete(children[1].id) : onDelete}
+              onDelete={
+                children.length === 2
+                  ? () => handleSplit_Delete(children[1].id)
+                  : onDelete
+              }
             />
           </div>
         )}
