@@ -5,8 +5,10 @@ const generateRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const ResizeComponent_V = ({ onResize }) => {
+const ResizeComponent_V = ({ onResize, currentPercentage }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [showPercentage, setShowPercentage] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const handleMouseMove_Vertical = (e) => {
@@ -17,9 +19,19 @@ const ResizeComponent_V = ({ onResize }) => {
 
     const handleMouseUp_Vertical = () => {
       setIsDragging(false);
+      
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 800);
+      
+      setTimeout(() => {
+        setShowPercentage(false);
+      }, 1000);
     };
 
     if (isDragging) {
+      setShowPercentage(true);
+      setIsVisible(true);
       document.addEventListener("mousemove", handleMouseMove_Vertical);
       document.addEventListener("mouseup", handleMouseUp_Vertical);
     }
@@ -32,13 +44,26 @@ const ResizeComponent_V = ({ onResize }) => {
 
   return (
     <div
-      className="w-2 bg-gray-600 hover:bg-red-500 cursor-col-resize flex-shrink-0 transition-colors"
+      className="relative w-2 bg-gray-600 hover:bg-red-500 cursor-col-resize flex-shrink-0 transition-colors"
       onMouseDown={() => setIsDragging(true)}
-    />
+    >
+      {showPercentage && (
+        <div 
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-bold whitespace-nowrap z-10 shadow-lg transition-opacity duration-200 ${
+            isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {currentPercentage.toFixed(1)}%
+        </div>
+      )}
+    </div>
   );
 };
-const ResizeComponent_H = ({ onResize }) => {
+
+const ResizeComponent_H = ({ onResize, currentPercentage }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [showPercentage, setShowPercentage] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const handleMouseMove_Horizontal = (e) => {
@@ -49,9 +74,19 @@ const ResizeComponent_H = ({ onResize }) => {
 
     const handleMouseUp_Horizontal = () => {
       setIsDragging(false);
+      
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 800);
+      
+      setTimeout(() => {
+        setShowPercentage(false);
+      }, 1000);
     };
 
     if (isDragging) {
+      setShowPercentage(true);
+      setIsVisible(true);
       document.addEventListener("mousemove", handleMouseMove_Horizontal);
       document.addEventListener("mouseup", handleMouseUp_Horizontal);
     }
@@ -64,9 +99,19 @@ const ResizeComponent_H = ({ onResize }) => {
 
   return (
     <div
-      className="h-2 bg-gray-600 hover:bg-red-500 cursor-row-resize flex-shrink-0 transition-colors"
+      className="relative h-2 bg-gray-600 hover:bg-red-500 cursor-row-resize flex-shrink-0 transition-colors"
       onMouseDown={() => setIsDragging(true)}
-    />
+    >
+      {showPercentage && (
+        <div 
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-bold whitespace-nowrap z-10 shadow-lg transition-opacity duration-200 ${
+            isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {currentPercentage.toFixed(1)}%
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -136,7 +181,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
           />
         </div>
 
-        <ResizeComponent_V onResize={handleResize_Vertically} />
+        <ResizeComponent_V onResize={handleResize_Vertically} currentPercentage={leftWidth} />
         <div style={{ width: `${100 - leftWidth}%` }} className="h-full">
           <DivBox
             key={children[1].id}
@@ -163,7 +208,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
           />
         </div>
 
-        <ResizeComponent_H onResize={handleResize_Horizontally} />
+        <ResizeComponent_H onResize={handleResize_Horizontally} currentPercentage={topHeight} />
         <div style={{ height: `${100 - topHeight}%` }} className="w-full">
           <DivBox
             key={children[1].id}
