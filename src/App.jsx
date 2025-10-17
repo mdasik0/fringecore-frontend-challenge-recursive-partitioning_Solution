@@ -19,11 +19,11 @@ const ResizeComponent_V = ({ onResize, currentPercentage }) => {
 
     const handleMouseUp_Vertical = () => {
       setIsDragging(false);
-      
+
       setTimeout(() => {
         setIsVisible(false);
       }, 800);
-      
+
       setTimeout(() => {
         setShowPercentage(false);
       }, 1000);
@@ -48,9 +48,9 @@ const ResizeComponent_V = ({ onResize, currentPercentage }) => {
       onMouseDown={() => setIsDragging(true)}
     >
       {showPercentage && (
-        <div 
+        <div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-bold whitespace-nowrap z-10 shadow-lg transition-opacity duration-200 ${
-            isVisible ? 'opacity-100' : 'opacity-0'
+            isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
           {currentPercentage.toFixed(1)}%
@@ -74,11 +74,11 @@ const ResizeComponent_H = ({ onResize, currentPercentage }) => {
 
     const handleMouseUp_Horizontal = () => {
       setIsDragging(false);
-      
+
       setTimeout(() => {
         setIsVisible(false);
       }, 800);
-      
+
       setTimeout(() => {
         setShowPercentage(false);
       }, 1000);
@@ -103,9 +103,9 @@ const ResizeComponent_H = ({ onResize, currentPercentage }) => {
       onMouseDown={() => setIsDragging(true)}
     >
       {showPercentage && (
-        <div 
+        <div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-bold whitespace-nowrap z-10 shadow-lg transition-opacity duration-200 ${
-            isVisible ? 'opacity-100' : 'opacity-0'
+            isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
           {currentPercentage.toFixed(1)}%
@@ -135,6 +135,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
       setLeftWidth(50);
     }
   };
+
   const handleSplit_Horizontally = () => {
     const newChildrenDivs = [
       { id: `${id}-top`, color: bgColor },
@@ -149,8 +150,10 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
   };
 
   const handleSplit_Delete = (childId) => {
-    const updatedChildren = children.filter((c) => c.id !== childId);
-    setChildren(updatedChildren);
+    setChildren((prevChildren) => {
+      const updatedChildren = prevChildren.filter((c) => c.id !== childId);
+      return updatedChildren;
+    });
   };
 
   const handleResize_Vertically = (clientX) => {
@@ -160,6 +163,7 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
       setLeftWidth(Math.max(10, Math.min(90, newLeftWidth)));
     }
   };
+
   const handleResize_Horizontally = (clientY) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -170,76 +174,87 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
 
   if (hasSplit_Vertically) {
     return (
-      <>
-      {
-        children.length == 1 ? <div className="w-full h-full">
-          <DivBox
-            key={children[0]?.id}
-            id={children[0]?.id}
-            depth={depth + 2}
-            bgColor={children[0]?.color}
-            onDelete={() => handleSplit_Delete(children[0]?.id)}
+      <div ref={containerRef} className="flex w-full h-full">
+        {children[0] && (
+          <div
+            style={{ width: children.length === 1 ? "100%" : `${leftWidth}%` }}
+            className="h-full"
+          >
+            <DivBox
+              key={children[0].id}
+              id={children[0].id}
+              depth={depth + 2}
+              bgColor={children[0].color}
+              onDelete={children.length === 2 ? () => handleSplit_Delete(children[0].id) : onDelete}
+            />
+          </div>
+        )}
+        {children.length === 2 && (
+          <ResizeComponent_V
+            onResize={handleResize_Vertically}
+            currentPercentage={leftWidth}
           />
-        </div> : <div ref={containerRef} className="flex w-full h-full">
-        <div style={{ width: `${leftWidth}%` }} className="h-full">
-          <DivBox
-            key={children[0]?.id}
-            id={children[0]?.id}
-            depth={depth + 2}
-            bgColor={children[0]?.color}
-            onDelete={() => handleSplit_Delete(children[0]?.id)}
-          />
-        </div>
-        <ResizeComponent_V onResize={handleResize_Vertically} currentPercentage={leftWidth} />
-        <div style={{ width: `${100 - leftWidth}%` }} className="h-full">
-          <DivBox
-            key={children[1]?.id}
-            id={children[1]?.id}
-            depth={depth + 2}
-            bgColor={children[1]?.color}
-            onDelete={() => handleSplit_Delete(children[1]?.id)}
-          />
-        </div>
+        )}
+        {children[1] && (
+          <div
+            style={{
+              width: children.length === 1 ? "100%" : `${100 - leftWidth}%`,
+            }}
+            className="h-full"
+          >
+            <DivBox
+              key={children[1].id}
+              id={children[1].id}
+              depth={depth + 2}
+              bgColor={children[1].color}
+              onDelete={children.length === 2 ? () => handleSplit_Delete(children[1].id) : onDelete}
+            />
+          </div>
+        )}
       </div>
-      }
-      </>
     );
   }
 
   if (hasSplit_Horizontally) {
     return (
-      <>
-      {children.length == 1 ? <div className="h-full w-full">
-          <DivBox
-            key={children[0]?.id}
-            id={children[0]?.id}
-            depth={depth + 2}
-            bgColor={children[0]?.color}
-            onDelete={() => handleSplit_Delete(children[0]?.id)}
+      <div ref={containerRef} className="flex flex-col w-full h-full">
+        {children[0] && (
+          <div
+            style={{ height: children.length === 1 ? "100%" : `${topHeight}%` }}
+            className="w-full"
+          >
+            <DivBox
+              key={children[0].id}
+              id={children[0].id}
+              depth={depth + 2}
+              bgColor={children[0].color}
+              onDelete={children.length === 2 ? () => handleSplit_Delete(children[0].id) : onDelete}
+            />
+          </div>
+        )}
+        {children.length === 2 && (
+          <ResizeComponent_H
+            onResize={handleResize_Horizontally}
+            currentPercentage={topHeight}
           />
-        </div> : <div ref={containerRef} className="flex flex-col w-full h-full">
-        <div style={{ height: `${topHeight}%` }} className="w-full">
-          <DivBox
-            key={children[0]?.id}
-            id={children[0]?.id}
-            depth={depth + 2}
-            bgColor={children[0]?.color}
-            onDelete={() => handleSplit_Delete(children[0]?.id)}
-          />
-        </div>
-
-        <ResizeComponent_H onResize={handleResize_Horizontally} currentPercentage={topHeight} />
-        <div style={{ height: `${100 - topHeight}%` }} className="w-full">
-          <DivBox
-            key={children[1]?.id}
-            id={children[1]?.id}
-            depth={depth + 2}
-            bgColor={children[1]?.color}
-            onDelete={() => handleSplit_Delete(children[1]?.id)}
-          />
-        </div>
-      </div>}
-      </>
+        )}
+        {children[1] && (
+          <div
+            style={{
+              height: children.length === 1 ? "100%" : `${100 - topHeight}%`,
+            }}
+            className="w-full"
+          >
+            <DivBox
+              key={children[1].id}
+              id={children[1].id}
+              depth={depth + 2}
+              bgColor={children[1].color}
+              onDelete={children.length === 2 ? () => handleSplit_Delete(children[1].id) : onDelete}
+            />
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -262,7 +277,10 @@ const DivBox = ({ id, depth, bgColor, onDelete }) => {
         </button>
         {onDelete && (
           <button
-            onClick={onDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
             className="bg-white hover:bg-gray-200 duration-300 w-8 h-8 flex items-center justify-center border-2 border-gray-400 -ml-1 text-xl uppercase"
           >
             -
